@@ -8,3 +8,5 @@ def playSound(duration):
         sound.play()
         time.sleep(6)
 
+if __name__ == "__main__":
+    playSound(6)

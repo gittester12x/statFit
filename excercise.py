@@ -28,7 +28,7 @@ class Trainingsplan:
         print("Training started at "+str(beginn))
         for excercise in self.excercises:
             excercise.startExcercise()
-            pause(90)
+            
 
 class Excercise:
     name = " "
@@ -50,7 +50,6 @@ class Set:
         self.doneReps = 0
     def playSet(self):
         time.sleep(1)
-
 
 class Pushup(Set):
     def __init__(self,maxReps = 10,up = 3,down = 3):
