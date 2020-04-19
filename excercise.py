@@ -40,16 +40,20 @@ class Excercise:
     def addSet(self,set):
         self.sets.append(set)
 
-    def startExcercise(self):
-        for set in self.sets:
-            set.playSet()
-
+    def startExcercise(self,pauseDuration = 60):
+        for i in range(len(self.sets)):
+            self.sets[i].playSet()
+            pause(pauseDuration)
+            
 class Set:
-    def __init__(self,maxReps = 10):
+    def __init__(self,name = "Excercise",maxReps = 10, up = 3, down = 3):
+        self.name = " "
         self.maxReps = maxReps
         self.doneReps = 0
     def playSet(self):
-        time.sleep(1)
+        for rep in range(self.maxReps):
+            sound.playSound(self.up+self.down)
+
 
 class Pushup(Set):
     def __init__(self,maxReps = 10,up = 3,down = 3):
@@ -58,19 +62,26 @@ class Pushup(Set):
         self.up = up
         self.down = down
 
+    def getResult(self):
+        print("So... how many pushups did you make?")
+        self.doneReps = input()
+
     def playSet(self):
         for rep in range(self.maxReps):
             sound.playSound(self.up+self.down)
+        self.getResult()
         
-    def getResult(self):
-        print("\nSo... how many pushups did you make?")
-        self.doneReps = input()
-            
-
 
 def pause(length):
-    print("\nWell done... Now rest for a minute!\n")
+    print("\nWell done... Now rest for "+str(length)+" seconds!")
     for j in range(length):
         sys.stdout.write('\r\a{j}'.format(j=length-j))
         sys.stdout.flush()
         time.sleep(1)
+
+
+### Testscenario
+if __name__ == "__main__":
+    training = Trainingsplan()
+    training.addExcercise()
+    training.startTraining()
