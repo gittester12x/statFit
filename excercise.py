@@ -28,6 +28,7 @@ class Trainingsplan:
         print("Training started at "+str(beginn))
         for excercise in self.excercises:
             excercise.startExcercise()
+            pause(90)
 
 class Excercise:
     name = " "
@@ -61,8 +62,10 @@ class Pushup(Set):
     def playSet(self):
         for rep in range(self.maxReps):
             sound.playSound(self.up+self.down)
-        pause(90)
-
+        
+    def getResult(self):
+        print("\nSo... how many pushups did you make?")
+        self.doneReps = input()
             
 
 
@@ -72,8 +75,3 @@ def pause(length):
         sys.stdout.write('\r\a{j}'.format(j=length-j))
         sys.stdout.flush()
         time.sleep(1)
-
-
-
-
-
