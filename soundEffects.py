@@ -8,5 +8,12 @@ def playSound(duration):
         sound.play()
         time.sleep(6)
 
+def playEffect(effect="gong"):
+    if effect=="gong":
+        mixer.init()
+        sound = mixer.Sound('/home/paul/Programming/statFit/sounds/metal-gong.wav')
+        sound.play()
+        
+
 if __name__ == "__main__":
-    playSound(6)
+    playEffect("gong",duration=3)

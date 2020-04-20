@@ -20,11 +20,12 @@ class Trainingsplan:
             excercise.addSet(name=name,maxReps=10,up=up,down=down)
         self.excercises.append(excercise)
 
-    def startTraining(self,pauseDuration = 60):
+    def startTraining(self,pauseDuration = 60,warmup = True):
         beginn = pd.Timestamp(datetime.datetime.now())
         print("Training started at "+str(beginn))
         for excercise in self.excercises:
             excercise.startExcercise(pauseDuration)
+        end = pd.Timestamp(datetime.datetime.now())
             
 
 class Excercise:
@@ -87,6 +88,8 @@ class Pushup(Set):
 def pause(length):
     print("Well done... Now rest for "+str(length)+" seconds!")
     for j in range(length):
+        if j==length-10:
+            sound.playEffect("gong")                                ## Gong 10 seconds before pause ends
         sys.stdout.write('\r\a{j}'.format(j=length-j))
         sys.stdout.flush()
         time.sleep(1)
