@@ -1,5 +1,6 @@
 from pygame import mixer  # Load the popular external library
 import time
+import os
 
 def playSound(duration):
     if duration == 6:
