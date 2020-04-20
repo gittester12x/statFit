@@ -5,7 +5,7 @@ import soundEffects as sound
 import sys
 import os
 import keyboard  # using module keyboard
-
+import select 
 class Trainingsplan: 
     pauseLength = 0
     beginn = None
@@ -58,17 +58,22 @@ class Set:
         self.down = down
 
     def playSet(self):
-        while True:
-            try:
-                if keyboard.is_pressed('space')
-        for rep in range(self.maxReps):
-            os.system('clear')
-            print("Excercise: "+self.name)
-            print(rep+1)
+        while True:    
+            for rep in range(self.maxReps):
+                i,o,e = select.select([sys.stdin],[],[],0.0001)
+                if i == [sys.stdin]: break
+                os.system('clear')
+                print("Excercise: "+self.name)
+                print(rep+1)
+                print("Press ENTER to abort set")
+                self.doneReps=rep
+                sound.playSound(self.up+self.down)
+            break   
+
+        ### Deprecated
+        ##self.getResult()
             
-            sound.playSound(self.up+self.down)
-        self.getResult()
-    
+    ## deprecated
     def getResult(self):
         print("So... how many pushups did you make?")
         self.doneReps = input()
@@ -91,6 +96,8 @@ class Pushup(Set):
             os.system('clear')
             print("Excercise: ")
             print(rep)
+            if input() == " ":
+                break
             sound.playSound(self.up+self.down)
         self.getResult()
         
@@ -109,7 +116,6 @@ def pause(length):
 
 ### Testscenario
 if __name__ == "__main__":
-    pause(60)
     training = Trainingsplan()
     training.addExcercise(name = "Pushups", maxReps = 10, sets = 4, up = 3, down = 3)
     training.addExcercise(name = "Situps", maxReps = 10, sets = 4, up = 3, down = 3)
