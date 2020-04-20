@@ -1,6 +1,19 @@
-import sys, select, time
-while True:
-    print("Looping until ENTER pressed")
-    time.sleep(1)
-    i,o,e = select.select([sys.stdin],[],[],0.0001)
-    if i == [sys.stdin]: break
+import sys, select
+
+print("You have ten seconds to answer!")
+
+i, o, e = select.select( [sys.stdin], [], [], 10 )
+
+if (i):
+  print("You said", sys.stdin.readline().strip())
+else:
+  print("You said nothing!")
+
+print("You have ten seconds to answer!")
+
+i, o, e = select.select( [sys.stdin], [], [], 10 )
+
+if (i):
+  print("You said", sys.stdin.readline().strip())
+else:
+  print("You said nothing!")

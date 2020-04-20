@@ -61,10 +61,16 @@ class Set:
         while True:    
             for rep in range(self.maxReps):
                 i,o,e = select.select([sys.stdin],[],[],0.0001)
-                if i == [sys.stdin]: break
+                if i == [sys.stdin]:
+                    strangeThing = sys.stdin.readline().strip()
+                    break
                 os.system('clear')
-                print("Excercise: "+self.name)
-                print(rep+1)
+                print(self.name)
+                print(str(rep+1)+" of "+str(self.maxReps))
+                ##print(rep+1)
+                print(" ")
+                print(" ")
+                print(" ")
                 print("Press ENTER to abort set")
                 self.doneReps=rep
                 sound.playSound(self.up+self.down)
@@ -72,7 +78,8 @@ class Set:
 
         ### Deprecated
         ##self.getResult()
-            
+
+
     ## deprecated
     def getResult(self):
         print("So... how many pushups did you make?")

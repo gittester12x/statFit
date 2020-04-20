@@ -17,4 +17,6 @@ def playEffect(effect="gong"):
         
 
 if __name__ == "__main__":
-    playEffect("gong",duration=3)
+    playEffect("gong")
+    import sys
+    print(sys.version)
