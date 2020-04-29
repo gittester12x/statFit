@@ -28,7 +28,14 @@ class Trainingsplan:
         for excercise in self.excercises:
             excercise.startExcercise(pauseDuration)
         end = pd.Timestamp(datetime.datetime.now())
-            
+
+    def printResult(self):
+        os.system('clear')
+        for excercise in self.excercises:
+            print(excercise.name+": ",end="")
+            for set in excercise.sets:
+                print(str(set.doneReps)+"/"+str(set.maxReps),end=" ")
+            print()
 
 class Excercise:
     def __init__(self,name = "Excercise"):
@@ -102,14 +109,11 @@ if __name__ == "__main__":
     training = Trainingsplan()
     training.addExcercise(name = "Pushups", maxReps = 10, sets = 2, up = 3, down = 3)
     training.addExcercise(name = "Situps", maxReps = 10, sets = 2, up = 3, down = 3)
-    training.addExcercise(name = "Planks", maxReps = 10, sets = 2, up = 3, down = 3)
+    #training.addExcercise(name = "Planks", maxReps = 10, sets = 2, up = 3, down = 3)
     #training.addExcercise(name = "Rückenzieher", maxReps = 10, sets = 4, up = 3, down = 3)
     #training.addExcercise(name = "Kniebeugen links", maxReps = 10, sets = 3, up = 3, down = 3)
     #training.addExcercise(name = "Kniebeugen rechts", maxReps = 10, sets = 3, up = 3, down = 3)
-    for ex in training.excercises:
-        for set in ex.sets:
-            print(set.name)
-    
-    time.sleep(5)
-    #training.startTraining(pauseDuration=1)
+    training.startTraining(pauseDuration=1)
+    training.printResult()
+    time.sleep(10)
 
