@@ -18,7 +18,7 @@ class Trainingsplan:
     def addExcercise(self,name = "Excercise", maxReps=10,sets = 4, up = 3, down = 3):
         excercise = Excercise(name=name)
         for i in range(sets):
-            excercise.addSet(name=name,maxReps=10,up=up,down=down)
+            excercise.addSet(name=excercise.name+"."+excercise.name,maxReps=10,up=up,down=down)
         self.excercises.append(excercise)
 
     def startTraining(self,pauseDuration = 60,warmup = True):
@@ -33,13 +33,14 @@ class Trainingsplan:
 class Excercise:
     def __init__(self,name = "Excercise"):
         self.name = name
-    beginn = None
-    end = None
-    pause = None
-    sets = []
+        self.beginn = None
+        self.end = None
+        self.pause = None
+        self.sets = []
 
     def addSet(self,name = "Excercise",maxReps = 10, up = 3, down = 3):
-        self.sets.append(Set(name = self.name,maxReps = 10, up = 3, down = 3))
+        set = Set(name = name,maxReps = 10, up = 3, down = 3)
+        self.sets.append(set)
         
 
     def startExcercise(self,pauseDuration = 60):
@@ -51,6 +52,7 @@ class Excercise:
             
 class Set:
     def __init__(self,name = "Excercise",maxReps = 10, up = 3, down = 3):
+        print("Set added with name"+name)
         self.name = name
         self.maxReps = maxReps
         self.doneReps = 0
@@ -80,33 +82,7 @@ class Set:
         ##self.getResult()
 
 
-    ## deprecated
-    def getResult(self):
-        print("So... how many pushups did you make?")
-        self.doneReps = input()
 
-
-### deprecated
-class Pushup(Set):
-    def __init__(self,maxReps = 10,up = 3,down = 3):
-        self.maxReps = maxReps
-        self.doneReps = 0
-        self.up = up
-        self.down = down
-
-    def getResult(self):
-        print("So... how many pushups did you make?")
-        self.doneReps = input()
-
-    def playSet(self):
-        for rep in range(self.maxReps):
-            os.system('clear')
-            print("Excercise: ")
-            print(rep)
-            if input() == " ":
-                break
-            sound.playSound(self.up+self.down)
-        self.getResult()
         
 
 def pause(length):
@@ -124,10 +100,16 @@ def pause(length):
 ### Testscenario
 if __name__ == "__main__":
     training = Trainingsplan()
-    training.addExcercise(name = "Pushups", maxReps = 10, sets = 4, up = 3, down = 3)
-    training.addExcercise(name = "Situps", maxReps = 10, sets = 4, up = 3, down = 3)
-    training.addExcercise(name = "Planks", maxReps = 10, sets = 4, up = 3, down = 3)
-    training.addExcercise(name = "Rückenzieher", maxReps = 10, sets = 4, up = 3, down = 3)
-    training.addExcercise(name = "Kniebeugen links", maxReps = 10, sets = 3, up = 3, down = 3)
-    training.addExcercise(name = "Kniebeugen rechts", maxReps = 10, sets = 3, up = 3, down = 3)
-    training.startTraining(pauseDuration=60)
+    training.addExcercise(name = "Pushups", maxReps = 10, sets = 2, up = 3, down = 3)
+    training.addExcercise(name = "Situps", maxReps = 10, sets = 2, up = 3, down = 3)
+    training.addExcercise(name = "Planks", maxReps = 10, sets = 2, up = 3, down = 3)
+    #training.addExcercise(name = "Rückenzieher", maxReps = 10, sets = 4, up = 3, down = 3)
+    #training.addExcercise(name = "Kniebeugen links", maxReps = 10, sets = 3, up = 3, down = 3)
+    #training.addExcercise(name = "Kniebeugen rechts", maxReps = 10, sets = 3, up = 3, down = 3)
+    for ex in training.excercises:
+        for set in ex.sets:
+            print(set.name)
+    
+    time.sleep(5)
+    #training.startTraining(pauseDuration=1)
+
