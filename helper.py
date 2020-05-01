@@ -1,19 +1,44 @@
-import sys, select
+import mysql.connector
+from mysql.connector import Error
+import datetime
+import pandas as pd
 
-print("You have ten seconds to answer!")
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="trainingsuser",
+  passwd="123456",
+  database="training"
+)
 
-i, o, e = select.select( [sys.stdin], [], [], 10 )
 
-if (i):
-  print("You said", sys.stdin.readline().strip())
-else:
-  print("You said nothing!")
+mycursor = mydb.cursor()
 
-print("You have ten seconds to answer!")
+start = pd.Timestamp(datetime.datetime.now())
+end = pd.Timestamp(datetime.datetime.now())
 
-i, o, e = select.select( [sys.stdin], [], [], 10 )
 
-if (i):
-  print("You said", sys.stdin.readline().strip())
-else:
-  print("You said nothing!")
+sqlquery = "INSERT INTO training (startTime,endTime) VALUES (TIMESTAMP('"+str(start)+"'),TIMESTAMP('2002-02-02'));"                
+
+mycursor.execute(sqlquery)
+
+##mycursor.execute("DELETE FROM training")
+
+#mycursor.execute("INSERT INTO excercises (excerciseId,doneReps,plannedReps) VALUES (1,4,10);")
+#mycursor.execute("INSERT INTO sets (excerciseId,doneReps,plannedReps) VALUES (1,4,10);")
+
+#mycursor.execute("SELECT * FROM training")
+
+#myresult = mycursor.fetchall()
+
+mydb.commit()
+
+mycursor.execute("select * from training")
+
+myresult = mycursor.fetchall();
+
+
+for x in myresult:
+  print(x)
+
+
+#print("1 record inserted, ID:", mycursor.lastrowid)
