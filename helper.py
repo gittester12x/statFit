@@ -5,9 +5,10 @@ import pandas as pd
 
 mydb = mysql.connector.connect(
   host="localhost",
-  user="trainingsuser",
-  passwd="123456",
-  database="training"
+  user="root",
+  passwd="my-secret-pw",
+  database="training",
+  port = 3306
 )
 
 

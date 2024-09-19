@@ -1,3 +1,9 @@
+CREATE TABLE training (
+	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	startTime TIMESTAMP,
+	endTime TIMESTAMP
+);
+
 CREATE TABLE excercises (
 	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	trainingId INT(6) UNSIGNED,
@@ -10,19 +16,12 @@ CREATE TABLE excercises (
 	FOREIGN KEY(trainingId) REFERENCES training(id)
 	);
 	
-	
 CREATE TABLE sets (
 	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	excerciseId INT(6) UNSIGNED,
 	doneReps INT(4),
 	plannedReps INT(4),
 	FOREIGN KEY (excerciseId) REFERENCES excercises(id)
-);
-
-CREATE TABLE training (
-	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	startTime TIMESTAMP,
-	endTime TIMESTAMP
 );
 
 ALTER TABLE excercises
