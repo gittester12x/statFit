@@ -108,7 +108,7 @@ class Excercise:
         print("Starting " + self.name)
         for i in range(len(self.sets)):
             self.sets[i].playSet()
-            pause(pauseDuration)
+            pause(pauseDuration, self.name, i)
         self.end = pd.Timestamp(datetime.datetime.now())
 
 class Set:
@@ -149,7 +149,7 @@ class Set:
         return False
 
 
-def pause(length):
+def pause(length, exercise, number):
     os.system('clear')
     print("Well done... Now rest for " + str(length) + " seconds!")
     for j in range(length):
@@ -158,11 +158,13 @@ def pause(length):
         os.system('clear')
         timeLeft = length - j  # Gong 10 seconds before pause ends
         print("Time until training continues: " + str(timeLeft))
+        print("\n\nCurrent exercise: "+exercise+". Set number "+str(number+1))
         time.sleep(1)
 
 # Test scenario
 if __name__ == "__main__":
     training = Trainingsplan()
+    pause(10, "Start", 0)
     training.addExcercise(name="Pushups", maxReps=8, sets=3, up=3, down=3)
     training.addExcercise(name="Situps", maxReps=8, sets=3, up=3, down=3)
     training.addExcercise(name="Planks", maxReps=8, sets=3, up=3, down=3)
