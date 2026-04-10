@@ -13,9 +13,9 @@ def find_available_port(start_port=5000, max_attempts=100):
     """Find an available port starting from start_port."""
     import platform
 
-    # On macOS, try 0.0.0.0 first as it's more reliable for local development
+    # On macOS, try localhost first for better browser compatibility
     if platform.system() == 'Darwin':  # macOS
-        hosts_to_try = ['0.0.0.0', 'localhost', '127.0.0.1']
+        hosts_to_try = ['localhost', '127.0.0.1', '0.0.0.0']
     else:
         hosts_to_try = ['localhost', '127.0.0.1', '0.0.0.0']
 
@@ -42,4 +42,4 @@ if __name__ == '__main__':
     print("❌ Press Ctrl+C to stop")
     print(f"🔧 Debug: Server bound to {host}:{port}")
 
-    app.run(debug=True, host=host, port=port)
+    app.run(debug=False, host=host, port=port)

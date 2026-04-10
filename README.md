@@ -48,6 +48,10 @@ That's it! Your training plan loads automatically. Click "Start Training" and be
 git clone <your-repo-url>
 cd statfit
 
+# Create virtual environment (recommended on macOS and some Linux systems)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install all dependencies
 pip install -r requirements.txt
 ```
@@ -69,7 +73,21 @@ sudo apt-get install libsdl2-dev libsdl2-mixer-dev
 ```
 
 #### macOS
-No additional setup required - works out of the box!
+On macOS, Python packages must be installed in a virtual environment due to system restrictions.
+
+```bash
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python run.py
+```
+
+No additional system libraries required - works out of the box!
 
 **Network Issues on macOS:**
 If you can't access the server on macOS, try these solutions:
