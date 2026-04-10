@@ -1,13 +1,6 @@
 import time
-import os
-from pynput import keyboard
 
 import soundEffects as sound
-
-
-def clear_screen():
-    """Clear the console screen in a cross-platform way."""
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 class Trainingsplan:
     """Main training plan class with web frontend support."""
@@ -26,39 +19,32 @@ class Trainingsplan:
         exercise = Exercise(name=name, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback)
         for i in range(sets):
             set_name = f"{exercise.name}.{i + 1}"
-            exercise.add_set(name=set_name, max_reps=max_reps, up=up, down=down)
+            exercise.add_set(name=set_name, max_reps=max_reps, up=up, down=down, total_sets=sets)
         self.exercises.append(exercise)
 
     def start_training(self, pause_duration=60):
         """Start the training session."""
-        clear_screen()
         self.begin = time.time()
         if self.status_callback:
             self.status_callback({"active": True, "current_exercise": "Starting training...", "current_set": "", "time_remaining": 0})
 
-        print(f"Training started at {self.begin}")
+        # Preparation countdown
+        rest_period(10, "Preparation", 0, self.status_callback, self.stop_check_callback)
+
         for i, exercise in enumerate(self.exercises):
             # Check if we should stop
             if self.stop_check_callback and self.stop_check_callback():
                 break
             self.current_exercise_index = i
             exercise.start_exercise(pause_duration)
+            # Rest between exercises
+            if i < len(self.exercises) - 1:
+                next_exercise = self.exercises[i + 1].name
+                rest_period(pause_duration, f"Prepare for {next_exercise}", i, self.status_callback, self.stop_check_callback)
         self.end = time.time()
 
         if self.status_callback:
             self.status_callback({"active": False, "current_exercise": "Training Complete!", "current_set": "", "time_remaining": 0})
-
-    def print_result(self):
-        """Print the training results."""
-        clear_screen()
-        for exercise in self.exercises:
-            print(f"{exercise.name}:")
-            print(f"  From {exercise.begin} to {exercise.end}")
-            print(f"  Positive phase: {exercise.up}s. Negative phase: {exercise.down}s.")
-            print("  Exercise performance: ", end="")
-            for set_item in exercise.sets:
-                print(f"{set_item.done_reps}/{set_item.max_reps}", end=" ")
-            print()
 
     def get_results(self):
         """Get training results as a dictionary."""
@@ -91,11 +77,11 @@ class Exercise:
         self.status_callback = status_callback
         self.stop_check_callback = stop_check_callback
 
-    def add_set(self, name="Exercise", max_reps=10, up=3, down=3):
+    def add_set(self, name="Exercise", max_reps=10, up=3, down=3, total_sets=1):
         """Add a set to this exercise."""
         self.up = up
         self.down = down
-        set_item = Set(name=name, max_reps=max_reps, up=up, down=down, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback)
+        set_item = Set(name=name, max_reps=max_reps, up=up, down=down, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback, total_sets=total_sets)
         self.sets.append(set_item)
 
     def start_exercise(self, pause_duration=60):
@@ -105,7 +91,6 @@ class Exercise:
         if self.status_callback:
             self.status_callback({"active": True, "current_exercise": self.name, "current_set": "", "time_remaining": 0})
 
-        print(f"Starting {self.name}")
         for i, set_item in enumerate(self.sets):
             # Check if we should stop
             if self.stop_check_callback and self.stop_check_callback():
@@ -114,13 +99,15 @@ class Exercise:
             if self.status_callback:
                 self.status_callback({"active": True, "current_exercise": self.name, "current_set": set_item.name, "time_remaining": 0})
             set_item.play_set()
-            rest_period(pause_duration, self.name, i, self.status_callback, self.stop_check_callback)
+            # Rest between sets
+            if i < len(self.sets) - 1:
+                rest_period(pause_duration, self.name, i, self.status_callback, self.stop_check_callback)
         self.end = time.time()
 
 class Set:
     """A single set within an exercise."""
 
-    def __init__(self, name="Exercise", max_reps=10, up=3, down=3, status_callback=None, stop_check_callback=None):
+    def __init__(self, name="Exercise", max_reps=10, up=3, down=3, status_callback=None, stop_check_callback=None, total_sets=1):
         self.name = name
         self.max_reps = max_reps
         self.done_reps = 0
@@ -128,58 +115,44 @@ class Set:
         self.down = down
         self.status_callback = status_callback
         self.stop_check_callback = stop_check_callback
+        self.total_sets = total_sets
 
     def play_set(self):
         """Play through this set of repetitions."""
+        exercise_name = self.name.split('.')[0]
+        set_number = int(self.name.split('.')[1])
+        current_set = f"Set {set_number}/{self.total_sets}"
         if self.status_callback:
-            self.status_callback({"active": True, "current_exercise": self.name.split('.')[0], "current_set": self.name, "time_remaining": 0})
+            self.status_callback({"active": True, "current_exercise": exercise_name, "current_set": current_set, "time_remaining": 0})
 
         rep = 0
         while rep < self.max_reps:
             # Check if we should stop
             if self.stop_check_callback and self.stop_check_callback():
                 break
-            clear_screen()
-            print(self.name)
-            print(f"{rep + 1} of {self.max_reps}")
-            print("\n\n\n")
-            print("Press ENTER to abort set")
+            if self.status_callback:
+                self.status_callback({"active": True, "current_exercise": exercise_name, "current_set": f"{current_set} - Rep {rep + 1}/{self.max_reps}", "time_remaining": 0})
             self.done_reps = rep + 1
             sound.play_sound(self.up + self.down)
             rep += 1
-            if self.detect_key_press():
-                break
-
-    def detect_key_press(self):
-        """Detect key press and return True if ENTER is pressed."""
-        def on_press(key):
-            try:
-                if key == keyboard.Key.enter:
-                    return False  # Stop listener
-            except AttributeError:
-                pass
-
-        with keyboard.Listener(on_press=on_press) as listener:
-            listener.join(timeout=0.1)
-        return False
 
 
 def rest_period(length, exercise, number, status_callback=None, stop_check_callback=None):
     """Display a rest period between sets."""
-    clear_screen()
-    print(f"Well done... Now rest for {length} seconds!")
     for j in range(length):
         # Check if we should stop
         if stop_check_callback and stop_check_callback():
             break
         if j == length - 10:
             sound.play_effect("gong")
-        clear_screen()
         time_left = length - j
         if status_callback:
-            status_callback({"active": True, "current_exercise": f"Rest after {exercise}", "current_set": "", "time_remaining": time_left})
-        print(f"Time until training continues: {time_left}")
-        print(f"\n\nCurrent exercise: {exercise}. Set number {number + 1}")
+            if exercise == "Preparation":
+                status_callback({"active": True, "current_exercise": "Get ready!", "current_set": "", "time_remaining": time_left})
+            elif "Prepare for" in exercise:
+                status_callback({"active": True, "current_exercise": exercise, "current_set": "", "time_remaining": time_left})
+            else:
+                status_callback({"active": True, "current_exercise": f"Rest after {exercise}", "current_set": "", "time_remaining": time_left})
         time.sleep(1)
 
 if __name__ == "__main__":
