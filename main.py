@@ -1,8 +1,7 @@
+"""Main entry point for the training application."""
 import excercise
 
- ### Test 
-training = excercise.Trainingsplan()
-
-training.addExcercise()
-
-training.startTraining()
+if __name__ == "__main__":
+    training = excercise.Trainingsplan()
+    training.add_exercise()
+    training.start_training()

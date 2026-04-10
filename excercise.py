@@ -1,142 +1,110 @@
-import pandas as pd
-import datetime
 import time
-import soundEffects as sound
-import sys
 import os
-import mysql.connector
-import select
 from pynput import keyboard
 
-class Trainingsplan: 
+import soundEffects as sound
+
+
+def clear_screen():
+    """Clear the console screen in a cross-platform way."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+class Trainingsplan:
+    """Main training plan class."""
+
     def __init__(self):
-        self.pauseLength = 0
         self.begin = None
         self.end = None
-        self.excercises = []
+        self.exercises = []
 
-    def result(self):
-        return None
-
-    def addExcercise(self, name="Exercise", maxReps=10, sets=4, up=3, down=3):
-        excercise = Excercise(name=name)
+    def add_exercise(self, name="Exercise", max_reps=10, sets=4, up=3, down=3):
+        """Add an exercise to the training plan."""
+        exercise = Exercise(name=name)
         for i in range(sets):
-            excercise.addSet(name=excercise.name + "." + str(i + 1), maxReps=maxReps, up=up, down=down)
-        self.excercises.append(excercise)
+            set_name = f"{exercise.name}.{i + 1}"
+            exercise.add_set(name=set_name, max_reps=max_reps, up=up, down=down)
+        self.exercises.append(exercise)
 
-    def startTraining(self, pauseDuration=60, warmup=True):
-        os.system('clear')
-        self.begin = pd.Timestamp(datetime.datetime.now())
-        print("Training started at " + str(self.begin))
-        for excercise in self.excercises:
-            excercise.startExcercise(pauseDuration)
-        self.end = pd.Timestamp(datetime.datetime.now())
+    def start_training(self, pause_duration=60):
+        """Start the training session."""
+        clear_screen()
+        self.begin = time.time()
+        print(f"Training started at {self.begin}")
+        for exercise in self.exercises:
+            exercise.start_exercise(pause_duration)
+        self.end = time.time()
 
-    def printResult(self):
-        os.system('clear')
-        for excercise in self.excercises:
-            print(excercise.name + ": ", end="\n")
-            print("  From " + str(excercise.beginn) + " to " + str(excercise.end))
-            print("  Positive phase: " + str(excercise.up) + "s. Negative phase: " + str(excercise.down) + "s.")
+    def print_result(self):
+        """Print the training results."""
+        clear_screen()
+        for exercise in self.exercises:
+            print(f"{exercise.name}:")
+            print(f"  From {exercise.begin} to {exercise.end}")
+            print(f"  Positive phase: {exercise.up}s. Negative phase: {exercise.down}s.")
             print("  Exercise performance: ", end="")
-            for set in excercise.sets:
-                print(str(set.doneReps) + "/" + str(set.maxReps), end=" ")
+            for set_item in exercise.sets:
+                print(f"{set_item.done_reps}/{set_item.max_reps}", end=" ")
             print()
 
-    def saveResult(self):
-        mydb = mysql.connector.connect(
-            host="localhost",
-            user="trainingsuser",
-            passwd="123456",
-            database="training"
-        )
-
-        mycursor = mydb.cursor()
-
-        # Add training
-        sqlquery = "INSERT INTO training (startTime, endTime) VALUES (TIMESTAMP(%s), TIMESTAMP(%s));"
-        mycursor.execute(sqlquery, (self.begin, self.end))
-        trainingId = mycursor.lastrowid
-        mydb.commit()
-
-        mycursor.execute("SELECT * FROM training")
-        myresult = mycursor.fetchall()
-        for x in myresult:
-            print(x)
-        
-        # Add exercises
-        for excercise in self.excercises:
-            sqlquery = """
-                INSERT INTO exercises (name, startTime, endTime, pauseLength, upLength, downLength, trainingId)
-                VALUES (%s, TIMESTAMP(%s), TIMESTAMP(%s), %s, %s, %s, %s)
-            """
-            mycursor.execute(sqlquery, (
-                excercise.name, excercise.beginn, excercise.end,
-                excercise.pause, excercise.up, excercise.down, trainingId
-            ))
-            excerciseId = mycursor.lastrowid
-            mydb.commit()
-
-            for set in excercise.sets:
-                sqlquery = """
-                    INSERT INTO sets (exerciseId, doneReps, plannedReps)
-                    VALUES (%s, %s, %s)
-                """
-                mycursor.execute(sqlquery, (excerciseId, set.doneReps, set.maxReps))
-                mydb.commit()
 
 
-class Excercise:
+
+class Exercise:
+    """Single exercise in a training plan."""
+
     def __init__(self, name="Exercise"):
         self.name = name
-        self.beginn = None
+        self.begin = None
         self.end = None
         self.pause = None
         self.sets = []
         self.up = 0
         self.down = 0
 
-    def addSet(self, name="Exercise", maxReps=10, up=3, down=3):
+    def add_set(self, name="Exercise", max_reps=10, up=3, down=3):
+        """Add a set to this exercise."""
         self.up = up
         self.down = down
-        set = Set(name=name, maxReps=maxReps, up=up, down=down)
-        self.sets.append(set)
-        
-    def startExcercise(self, pauseDuration=60):
-        self.pause = pauseDuration
-        self.beginn = pd.Timestamp(datetime.datetime.now())
-        print("Starting " + self.name)
-        for i in range(len(self.sets)):
-            self.sets[i].playSet()
-            pause(pauseDuration, self.name, i)
-        self.end = pd.Timestamp(datetime.datetime.now())
+        set_item = Set(name=name, max_reps=max_reps, up=up, down=down)
+        self.sets.append(set_item)
+
+    def start_exercise(self, pause_duration=60):
+        """Start performing this exercise."""
+        self.pause = pause_duration
+        self.begin = time.time()
+        print(f"Starting {self.name}")
+        for i, set_item in enumerate(self.sets):
+            set_item.play_set()
+            rest_period(pause_duration, self.name, i)
+        self.end = time.time()
 
 class Set:
-    def __init__(self, name="Exercise", maxReps=10, up=3, down=3):
+    """A single set within an exercise."""
+
+    def __init__(self, name="Exercise", max_reps=10, up=3, down=3):
         self.name = name
-        self.maxReps = maxReps
-        self.doneReps = 0
+        self.max_reps = max_reps
+        self.done_reps = 0
         self.up = up
         self.down = down
 
-    def playSet(self):
+    def play_set(self):
+        """Play through this set of repetitions."""
         rep = 0
-        while rep < self.maxReps:
-            os.system('clear')
+        while rep < self.max_reps:
+            clear_screen()
             print(self.name)
-            print(str(rep + 1) + " of " + str(self.maxReps))
-            print(" ")
-            print(" ")
-            print(" ")
+            print(f"{rep + 1} of {self.max_reps}")
+            print("\n\n\n")
             print("Press ENTER to abort set")
-            self.doneReps = rep + 1
-            sound.playSound(self.up + self.down)
+            self.done_reps = rep + 1
+            sound.play_sound(self.up + self.down)
             rep += 1
             if self.detect_key_press():
                 break
 
     def detect_key_press(self):
-        """Detects key press and returns True if ENTER is pressed"""
+        """Detect key press and return True if ENTER is pressed."""
         def on_press(key):
             try:
                 if key == keyboard.Key.enter:
@@ -145,32 +113,31 @@ class Set:
                 pass
 
         with keyboard.Listener(on_press=on_press) as listener:
-            listener.join(timeout=0.1)  # Timeout in seconds
+            listener.join(timeout=0.1)
         return False
 
 
-def pause(length, exercise, number):
-    os.system('clear')
-    print("Well done... Now rest for " + str(length) + " seconds!")
+def rest_period(length, exercise, number):
+    """Display a rest period between sets."""
+    clear_screen()
+    print(f"Well done... Now rest for {length} seconds!")
     for j in range(length):
         if j == length - 10:
-            sound.playEffect("gong")
-        os.system('clear')
-        timeLeft = length - j  # Gong 10 seconds before pause ends
-        print("Time until training continues: " + str(timeLeft))
-        print("\n\nCurrent exercise: "+exercise+". Set number "+str(number+1))
+            sound.play_effect("gong")
+        clear_screen()
+        time_left = length - j
+        print(f"Time until training continues: {time_left}")
+        print(f"\n\nCurrent exercise: {exercise}. Set number {number + 1}")
         time.sleep(1)
 
-# Test scenario
 if __name__ == "__main__":
     training = Trainingsplan()
-    pause(10, "Start", 0)
-    training.addExcercise(name="Pushups", maxReps=8, sets=3, up=3, down=3)
-    training.addExcercise(name="Situps", maxReps=8, sets=3, up=3, down=3)
-    training.addExcercise(name="Planks", maxReps=8, sets=3, up=3, down=3)
-    training.addExcercise(name="Rückenzieher", maxReps=8, sets=3, up=3, down=3)
-    training.addExcercise(name="Kniebeugen", maxReps=10, sets=3, up=3, down=3)
-    training.startTraining(pauseDuration=60)
-    training.printResult()
-    training.saveResult()
+    rest_period(10, "Start", 0)
+    training.add_exercise(name="Pushups", max_reps=8, sets=3, up=3, down=3)
+    training.add_exercise(name="Situps", max_reps=8, sets=3, up=3, down=3)
+    training.add_exercise(name="Planks", max_reps=8, sets=3, up=3, down=3)
+    training.add_exercise(name="Rückenzieher", max_reps=8, sets=3, up=3, down=3)
+    training.add_exercise(name="Kniebeugen", max_reps=10, sets=3, up=3, down=3)
+    training.start_training(pause_duration=60)
+    training.print_result()
     time.sleep(10)

@@ -1,27 +1,28 @@
-from pygame import mixer  # Load the popular external library
+"""Sound effects module for training application."""
 import time
 import os
+from pygame import mixer
 
-def playSound(duration):
-    cwd = os.getcwd() 
-    file = cwd+'/sounds/3sec.wav'
-    
+
+def play_sound(duration):
+    """Play a sound for the specified duration."""
+    sound_file = os.path.join(os.getcwd(), 'sounds', '3sec.wav')
+
     if duration == 6:
         mixer.init()
-        sound = mixer.Sound(file)
+        sound = mixer.Sound(sound_file)
         sound.play()
         time.sleep(6)
 
-def playEffect(effect="gong"):
-    cwd = os.getcwd() 
-    file = cwd+'/sounds/gong.mp3'
-    if effect=="gong":
+
+def play_effect(effect="gong"):
+    """Play a sound effect."""
+    sound_file = os.path.join(os.getcwd(), 'sounds', 'gong.mp3')
+    if effect == "gong":
         mixer.init()
-        sound = mixer.Sound(file)
+        sound = mixer.Sound(sound_file)
         sound.play()
-        
+
 
 if __name__ == "__main__":
-    playSound(6)
-    import sys
-    print(sys.version)
+    play_sound(6)
