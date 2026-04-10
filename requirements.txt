@@ -1,0 +1,11 @@
+# StatFit - Fitness Training Application Requirements
+# Cross-platform dependencies for Linux, macOS, and Windows
+
+# Web framework for the frontend interface
+Flask>=2.0.0
+
+# Audio library for sound effects and music playback
+pygame>=2.0.0
+
+# Cross-platform keyboard and mouse input library
+pynput>=1.7.0

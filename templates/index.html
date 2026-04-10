@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StatFit - Fitness Training App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .exercise-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .exercise-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exercise-item .info {
+            flex-grow: 1;
+        }
+
+        .exercise-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .training-status {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #28a745;
+        }
+
+        .status-inactive {
+            background: #6c757d;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .current-activity {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-info {
+            flex-grow: 1;
+        }
+
+        .activity-type {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .activity-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .countdown {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .result-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .sets-display {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .set-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-dumbbell"></i> StatFit</h1>
+            <p>Your Personal Fitness Training Companion</p>
+        </div>
+
+        <div class="training-status">
+            <div class="status-header">
+                <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                <span id="statusText">Ready to start training</span>
+            </div>
+            <div class="current-activity" id="currentActivity" style="display: none;">
+                <div class="activity-info">
+                    <div class="activity-type" id="activityType">Exercise</div>
+                    <div class="activity-name" id="activityName"></div>
+                </div>
+                <div class="countdown" id="countdown"></div>
+            </div>
+            <div class="progress-info" id="progressInfo" style="display: none;">
+                <div class="progress-text" id="progressText"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Create Training Plan</h2>
+                <div class="exercise-form" id="exerciseForm">
+                    <div class="form-group">
+                        <label for="exerciseName">Exercise Name</label>
+                        <input type="text" id="exerciseName" placeholder="e.g., Pushups">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxReps">Max Reps per Set</label>
+                        <input type="number" id="maxReps" value="10" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="sets">Number of Sets</label>
+                        <input type="number" id="sets" value="3" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="upTime">Up Time (seconds)</label>
+                        <input type="number" id="upTime" value="3" min="1" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="downTime">Down Time (seconds)</label>
+                        <input type="number" id="downTime" value="3" min="1" step="0.5">
+                    </div>
+                    <button class="btn btn-primary" onclick="addExercise()">
+                        <i class="fas fa-plus"></i> Add Exercise
+                    </button>
+                </div>
+
+                <div id="exerciseList"></div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-play-circle"></i> Training Controls</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="startTraining()" id="startBtn">
+                        <i class="fas fa-play"></i> Start Training
+                    </button>
+                    <button class="btn btn-danger" onclick="stopTraining()" id="stopBtn" disabled>
+                        <i class="fas fa-stop"></i> Stop Training
+                    </button>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <h3><i class="fas fa-chart-bar"></i> Training Results</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let exercises = [];
+        let statusCheckInterval;
+
+        function addExercise() {
+            const name = document.getElementById('exerciseName').value.trim();
+            const maxReps = parseInt(document.getElementById('maxReps').value);
+            const sets = parseInt(document.getElementById('sets').value);
+            const up = parseFloat(document.getElementById('upTime').value);
+            const down = parseFloat(document.getElementById('downTime').value);
+
+            if (!name) {
+                alert('Please enter an exercise name');
+                return;
+            }
+
+            exercises.push({ name, max_reps: maxReps, sets, up, down });
+            updateExerciseList();
+
+            // Clear form
+            document.getElementById('exerciseName').value = '';
+            document.getElementById('maxReps').value = '10';
+            document.getElementById('sets').value = '3';
+            document.getElementById('upTime').value = '3';
+            document.getElementById('downTime').value = '3';
+        }
+
+        function updateExerciseList() {
+            const list = document.getElementById('exerciseList');
+            list.innerHTML = exercises.map((ex, index) => `
+                <div class="exercise-item">
+                    <div class="info">
+                        <strong>${ex.name}</strong> - ${ex.sets} sets × ${ex.max_reps} reps
+                        <br><small>Up: ${ex.up}s, Down: ${ex.down}s</small>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-secondary btn-small" onclick="removeExercise(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeExercise(index) {
+            exercises.splice(index, 1);
+            updateExerciseList();
+        }
+
+        async function startTraining() {
+            if (exercises.length === 0) {
+                alert('Please add at least one exercise');
+                return;
+            }
+
+            try {
+                const response = await fetch('/start_training', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ exercises })
+                });
+
+                if (response.ok) {
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    statusCheckInterval = setInterval(checkStatus, 1000);
+                } else {
+                    alert('Failed to start training');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error starting training');
+            }
+        }
+
+        async function stopTraining() {
+            try {
+                await fetch('/stop_training', { method: 'POST' });
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                clearInterval(statusCheckInterval);
+                updateStatus({ active: false, current_exercise: '', current_set: '', time_remaining: 0 });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('/get_status');
+                const status = await response.json();
+                updateStatus(status);
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        function updateStatus(status) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const currentActivity = document.getElementById('currentActivity');
+            const activityType = document.getElementById('activityType');
+            const activityName = document.getElementById('activityName');
+            const countdown = document.getElementById('countdown');
+            const progressInfo = document.getElementById('progressInfo');
+            const progressText = document.getElementById('progressText');
+            const progressFill = document.getElementById('progressFill');
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('resultsContent');
+
+            if (status.active) {
+                indicator.className = 'status-indicator status-active';
+                statusText.textContent = 'Training in progress';
+                currentActivity.style.display = 'flex';
+
+                // Determine activity type and name
+                if (status.current_exercise && status.current_exercise.includes('Rest after')) {
+                    activityType.textContent = 'REST PERIOD';
+                    activityName.textContent = status.current_exercise.replace('Rest after ', '');
+                    currentActivity.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                } else if (status.current_exercise && status.current_exercise !== 'Starting training...') {
+                    activityType.textContent = 'EXERCISE';
+                    activityName.textContent = status.current_exercise;
+                    currentActivity.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                } else {
+                    activityType.textContent = 'PREPARING';
+                    activityName.textContent = status.current_exercise || 'Getting ready...';
+                    currentActivity.style.background = 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)';
+                }
+
+                // Show countdown if available
+                if (status.time_remaining > 0) {
+                    countdown.textContent = `${status.time_remaining}s`;
+                    countdown.style.display = 'block';
+                } else {
+                    countdown.style.display = 'none';
+                }
+
+                // Show progress information
+                if (status.current_set) {
+                    progressInfo.style.display = 'block';
+                    progressText.textContent = `Current: ${status.current_set}`;
+
+                    // Calculate progress based on current exercise and set
+                    const setMatch = status.current_set.match(/(\w+)\.(\d+)/);
+                    if (setMatch) {
+                        const exerciseName = setMatch[1];
+                        const setNumber = parseInt(setMatch[2]);
+
+                        // Find the exercise in our list
+                        const exerciseIndex = exercises.findIndex(ex => ex.name === exerciseName);
+                        if (exerciseIndex !== -1) {
+                            const exercise = exercises[exerciseIndex];
+                            const totalSets = exercise.sets;
+                            const completedSets = setNumber - 1;
+                            const progress = ((exerciseIndex * totalSets) + completedSets) / (exercises.length * totalSets) * 100;
+                            progressFill.style.width = `${Math.min(progress, 100)}%`;
+                        }
+                    }
+                } else {
+                    progressInfo.style.display = 'none';
+                }
+
+            } else {
+                indicator.className = 'status-indicator status-inactive';
+                statusText.textContent = 'Ready to start training';
+                currentActivity.style.display = 'none';
+                progressInfo.style.display = 'none';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                clearInterval(statusCheckInterval);
+
+                // Show results if training completed
+                if (status.current_exercise === 'Training Complete!') {
+                    showResults();
+                }
+            }
+        }
+
+        async function showResults() {
+            try {
+                const response = await fetch('/get_results');
+                const data = await response.json();
+                const resultsContent = document.getElementById('resultsContent');
+                const resultsDiv = document.getElementById('results');
+
+                if (data.results && data.results.length > 0) {
+                    resultsContent.innerHTML = data.results.map(exercise => `
+                        <div class="result-item">
+                            <h4>${exercise.name}</h4>
+                            <p>Duration: ${Math.round(exercise.end_time - exercise.start_time)} seconds</p>
+                            <p>Up: ${exercise.up_time}s, Down: ${exercise.down_time}s</p>
+                            <div class="sets-display">
+                                ${exercise.sets.map(set => `<span class="set-badge">${set.done}/${set.planned}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching results:', error);
+            }
+        }
+
+        // Load preset exercises
+        function loadPreset(preset) {
+            const presets = {
+                beginner: [
+                    { name: 'Pushups', max_reps: 8, sets: 3, up: 3, down: 3 },
+                    { name: 'Situps', max_reps: 8, sets: 3, up: 3, down: 3 },
+                    { name: 'Planks', max_reps: 20, sets: 3, up: 3, down: 3 }
+                ],
+                intermediate: [
+                    { name: 'Pushups', max_reps: 15, sets: 4, up: 3, down: 3 },
+                    { name: 'Situps', max_reps: 20, sets: 4, up: 3, down: 3 },
+                    { name: 'Planks', max_reps: 45, sets: 4, up: 3, down: 3 },
+                    { name: 'Squats', max_reps: 15, sets: 4, up: 3, down: 3 }
+                ]
+            };
+
+            exercises = presets[preset] || [];
+            updateExerciseList();
+        }
+
+        // Load default training plan on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDefaultPlan();
+            const form = document.getElementById('exerciseForm');
+            const presetButtons = document.createElement('div');
+            presetButtons.innerHTML = `
+                <p style="margin-bottom: 10px; color: #666;">Quick presets:</p>
+                <button class="btn btn-secondary btn-small" onclick="loadPreset('beginner')" style="margin-right: 10px;">
+                    <i class="fas fa-seedling"></i> Beginner
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="loadPreset('intermediate')">
+                    <i class="fas fa-dumbbell"></i> Intermediate
+                </button>
+            `;
+            form.appendChild(presetButtons);
+        });
+
+        function loadDefaultPlan() {
+            exercises = [
+                { name: "Pushups", max_reps: 8, sets: 3, up: 3, down: 3 },
+                { name: "Situps", max_reps: 8, sets: 3, up: 3, down: 3 },
+                { name: "Planks", max_reps: 8, sets: 3, up: 3, down: 3 },
+                { name: "Rückenzieher", max_reps: 8, sets: 3, up: 3, down: 3 },
+                { name: "Kniebeugen", max_reps: 10, sets: 3, up: 3, down: 3 }
+            ];
+            updateExerciseList();
+        }
+    </script>
+</body>
+</html>
