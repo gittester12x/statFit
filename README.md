@@ -20,6 +20,8 @@ python run.py
 # 4. Open http://localhost:5000 in your browser
 ```
 
+**Note**: If port 5000 is already in use, StatFit will automatically use the next available port (5001, 5002, etc.). Check the terminal output for the exact URL.
+
 That's it! Your training plan loads automatically. Click "Start Training" and begin! 💪
 
 ## Features
@@ -179,12 +181,7 @@ pip install -r requirements.txt
 ```
 
 **Port 5000 already in use:**
-```bash
-# Kill any process using port 5000
-lsof -ti:5000 | xargs kill -9
-
-# Or use a different port by modifying run.py
-```
+StatFit automatically finds an available port starting from 5000. Check the terminal output for the exact URL to use.
 
 ## 🛠️ Development
 
