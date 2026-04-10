@@ -193,6 +193,33 @@ Place your audio files in the `sounds/` directory:
 - **Port conflicts:** The app automatically finds available ports, but check if another service is blocking access
 - **Network restrictions:** Some corporate networks block local servers
 
+### Safari on macOS Issues
+
+If Safari won't load the page, try these solutions:
+
+1. **Allow insecure localhost connections:**
+   - In Safari, go to **Safari → Settings → Privacy**
+   - Uncheck "Prevent cross-site tracking" temporarily
+   - Or try **Develop → Disable Local File Restrictions** (if Develop menu is enabled)
+
+2. **Enable Develop menu:**
+   - Go to **Safari → Settings → Advanced**
+   - Check "Show Develop menu in menu bar"
+   - Then try **Develop → Disable Local File Restrictions**
+
+3. **Try a different browser:**
+   - Chrome: `http://localhost:[port]`
+   - Firefox: `http://localhost:[port]`
+   - Or use `http://127.0.0.1:[port]` in any browser
+
+4. **Check macOS firewall:**
+   - Go to **System Settings → Network → Firewall**
+   - Ensure it's not blocking Python or Flask
+
+5. **Try with 0.0.0.0 binding:**
+   - The app now tries `0.0.0.0` first on macOS
+   - Try: `http://0.0.0.0:[port]` in your browser
+
 ### Common Installation Issues
 
 **"Module not found" errors:**

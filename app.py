@@ -1,11 +1,13 @@
 """Web frontend for the fitness training application."""
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import excercise
 import threading
 import time
 import json
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Global variables to manage training state
 current_training = None

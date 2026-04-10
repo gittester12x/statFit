@@ -3,6 +3,7 @@
 
 # Web framework for the frontend interface
 Flask>=2.0.0
+flask-cors>=4.0.0
 
 # Audio library for sound effects and music playback
 pygame>=2.0.0

@@ -11,8 +11,13 @@ from app import app
 
 def find_available_port(start_port=5000, max_attempts=100):
     """Find an available port starting from start_port."""
-    # Try localhost first (more reliable on macOS)
-    hosts_to_try = ['localhost', '127.0.0.1', '0.0.0.0']
+    import platform
+
+    # On macOS, try 0.0.0.0 first as it's more reliable for local development
+    if platform.system() == 'Darwin':  # macOS
+        hosts_to_try = ['0.0.0.0', 'localhost', '127.0.0.1']
+    else:
+        hosts_to_try = ['localhost', '127.0.0.1', '0.0.0.0']
 
     for host in hosts_to_try:
         for port in range(start_port, start_port + max_attempts):
