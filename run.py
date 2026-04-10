@@ -11,20 +11,30 @@ from app import app
 
 def find_available_port(start_port=5000, max_attempts=100):
     """Find an available port starting from start_port."""
-    for port in range(start_port, start_port + max_attempts):
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.bind(('0.0.0.0', port))
-                return port
-        except OSError:
-            continue
+    # Try localhost first (more reliable on macOS)
+    hosts_to_try = ['localhost', '127.0.0.1', '0.0.0.0']
+
+    for host in hosts_to_try:
+        for port in range(start_port, start_port + max_attempts):
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                    sock.bind((host, port))
+                    return port, host
+            except OSError:
+                continue
+        # If we get here, try next host
+        continue
+
     raise RuntimeError(f"No available ports found between {start_port} and {start_port + max_attempts - 1}")
 
 if __name__ == '__main__':
     # Find an available port starting from 5000
-    port = find_available_port(5000)
+    port, host = find_available_port(5000)
 
     print("🚀 Starting StatFit...")
     print(f"📱 Open your browser to: http://localhost:{port}")
+    print(f"   Or try: http://127.0.0.1:{port}")
     print("❌ Press Ctrl+C to stop")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    print(f"🔧 Debug: Server bound to {host}:{port}")
+
+    app.run(debug=True, host=host, port=port)

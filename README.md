@@ -71,6 +71,25 @@ sudo apt-get install libsdl2-dev libsdl2-mixer-dev
 #### macOS
 No additional setup required - works out of the box!
 
+**Network Issues on macOS:**
+If you can't access the server on macOS, try these solutions:
+
+1. **Try alternative URLs:**
+   - `http://localhost:5000` (or your port number)
+   - `http://127.0.0.1:5000`
+   - `http://0.0.0.0:5000`
+
+2. **Check firewall settings:**
+   - Go to System Settings → Network → Firewall
+   - Ensure Python/Flask can accept incoming connections
+
+3. **Try a different browser:**
+   - Safari, Chrome, Firefox, or Edge
+
+4. **Check if the server is running:**
+   - Look for the "🚀 Starting StatFit..." message in terminal
+   - The terminal will show the exact URL to use
+
 #### Windows
 No additional setup required - works out of the box!
 
@@ -162,6 +181,17 @@ Place your audio files in the `sounds/` directory:
 ### Web Interface Issues
 - Ensure port 5000 is not blocked by firewall
 - Try a different browser if issues persist
+- Check that the server is actually running (look for startup messages in terminal)
+
+**Can't find/access the server?**
+- **Check the terminal output** - it shows the exact URL to use
+- **Try alternative URLs:**
+  - `http://localhost:[port]`
+  - `http://127.0.0.1:[port]`
+  - `http://0.0.0.0:[port]`
+- **Firewall issues:** Ensure your firewall allows Python/Flask connections
+- **Port conflicts:** The app automatically finds available ports, but check if another service is blocking access
+- **Network restrictions:** Some corporate networks block local servers
 
 ### Common Installation Issues
 
