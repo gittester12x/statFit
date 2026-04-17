@@ -191,6 +191,22 @@
             border-color: #667eea;
         }
 
+        .slider-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .slider-control label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
         .field-row input {
             width: 100%;
             box-sizing: border-box;
@@ -499,13 +515,18 @@
 
             <div class="card">
                 <h2><i class="fas fa-play-circle"></i> Training Controls</h2>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                     <button class="btn btn-success" onclick="startTraining()" id="startBtn">
                         <i class="fas fa-play"></i> Start Training
                     </button>
                     <button class="btn btn-danger" onclick="stopTraining()" id="stopBtn" disabled>
                         <i class="fas fa-stop"></i> Stop Training
                     </button>
+                </div>
+
+                <div class="slider-control">
+                    <label for="volumeRange">Sound Volume: <span id="volumeValue">30%</span></label>
+                    <input id="volumeRange" type="range" min="0" max="100" value="30" step="1" oninput="updateVolumeLabel(this.value)">
                 </div>
 
                 <div class="results" id="results" style="display: none;">
@@ -519,6 +540,7 @@
     <script>
         let exercises = [];
         let statusCheckInterval;
+        let volume = 0.3;
 
         function addExercise() {
             const name = document.getElementById('exerciseName').value.trim();
@@ -531,6 +553,11 @@
             updateExerciseList();
 
             document.getElementById('exerciseName').value = '';
+        }
+
+        function updateVolumeLabel(value) {
+            volume = parseInt(value, 10) / 100;
+            document.getElementById('volumeValue').textContent = `${value}%`;
         }
 
         function updateExerciseList() {
@@ -603,7 +630,7 @@
                 const response = await fetch('/start_training', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ exercises })
+                    body: JSON.stringify({ exercises, volume })
                 });
 
                 if (response.ok) {

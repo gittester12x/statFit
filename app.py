@@ -30,9 +30,10 @@ def start_training():
     # Get training configuration from request
     data = request.get_json()
     exercises = data.get('exercises', [])
+    volume = float(data.get('volume', 0.3))
 
     # Create training plan
-    current_training = excercise.Trainingsplan(status_callback=status_update, stop_check_callback=check_should_stop)
+    current_training = excercise.Trainingsplan(status_callback=status_update, stop_check_callback=check_should_stop, volume=volume)
 
     # Add exercises
     for ex in exercises:

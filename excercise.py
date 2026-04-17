@@ -5,7 +5,7 @@ import soundEffects as sound
 class Trainingsplan:
     """Main training plan class with web frontend support."""
 
-    def __init__(self, status_callback=None, stop_check_callback=None):
+    def __init__(self, status_callback=None, stop_check_callback=None, volume=0.3):
         self.begin = None
         self.end = None
         self.exercises = []
@@ -13,10 +13,11 @@ class Trainingsplan:
         self.stop_check_callback = stop_check_callback
         self.current_exercise_index = 0
         self.current_set_index = 0
+        self.volume = volume
 
     def add_exercise(self, name="Exercise", max_reps=10, sets=4, up=3, down=3):
         """Add an exercise to the training plan."""
-        exercise = Exercise(name=name, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback)
+        exercise = Exercise(name=name, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback, volume=self.volume)
         for i in range(sets):
             set_name = f"{exercise.name}.{i + 1}"
             exercise.add_set(name=set_name, max_reps=max_reps, up=up, down=down, total_sets=sets)
@@ -29,7 +30,7 @@ class Trainingsplan:
             self.status_callback({"active": True, "current_exercise": "Starting training...", "current_set": "", "time_remaining": 0})
 
         # Preparation countdown
-        rest_period(10, "Preparation", 0, self.status_callback, self.stop_check_callback)
+        rest_period(10, "Preparation", 0, self.status_callback, self.stop_check_callback, volume=self.volume)
 
         for i, exercise in enumerate(self.exercises):
             # Check if we should stop
@@ -40,7 +41,7 @@ class Trainingsplan:
             # Rest between exercises
             if i < len(self.exercises) - 1:
                 next_exercise = self.exercises[i + 1].name
-                rest_period(pause_duration, f"Prepare for {next_exercise}", i, self.status_callback, self.stop_check_callback)
+                rest_period(pause_duration, f"Prepare for {next_exercise}", i, self.status_callback, self.stop_check_callback, volume=self.volume)
         self.end = time.time()
 
         if self.status_callback:
@@ -66,7 +67,7 @@ class Trainingsplan:
 class Exercise:
     """Single exercise in a training plan."""
 
-    def __init__(self, name="Exercise", status_callback=None, stop_check_callback=None):
+    def __init__(self, name="Exercise", status_callback=None, stop_check_callback=None, volume=0.3):
         self.name = name
         self.begin = None
         self.end = None
@@ -76,12 +77,13 @@ class Exercise:
         self.down = 0
         self.status_callback = status_callback
         self.stop_check_callback = stop_check_callback
+        self.volume = volume
 
     def add_set(self, name="Exercise", max_reps=10, up=3, down=3, total_sets=1):
         """Add a set to this exercise."""
         self.up = up
         self.down = down
-        set_item = Set(name=name, max_reps=max_reps, up=up, down=down, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback, total_sets=total_sets)
+        set_item = Set(name=name, max_reps=max_reps, up=up, down=down, status_callback=self.status_callback, stop_check_callback=self.stop_check_callback, total_sets=total_sets, volume=self.volume)
         self.sets.append(set_item)
 
     def start_exercise(self, pause_duration=60):
@@ -101,13 +103,13 @@ class Exercise:
             set_item.play_set()
             # Rest between sets
             if i < len(self.sets) - 1:
-                rest_period(pause_duration, self.name, i, self.status_callback, self.stop_check_callback)
+                rest_period(pause_duration, self.name, i, self.status_callback, self.stop_check_callback, volume=self.volume)
         self.end = time.time()
 
 class Set:
     """A single set within an exercise."""
 
-    def __init__(self, name="Exercise", max_reps=10, up=3, down=3, status_callback=None, stop_check_callback=None, total_sets=1):
+    def __init__(self, name="Exercise", max_reps=10, up=3, down=3, status_callback=None, stop_check_callback=None, total_sets=1, volume=0.3):
         self.name = name
         self.max_reps = max_reps
         self.done_reps = 0
@@ -116,6 +118,7 @@ class Set:
         self.status_callback = status_callback
         self.stop_check_callback = stop_check_callback
         self.total_sets = total_sets
+        self.volume = volume
 
     def play_set(self):
         """Play through this set of repetitions."""
@@ -133,18 +136,18 @@ class Set:
             if self.status_callback:
                 self.status_callback({"active": True, "current_exercise": exercise_name, "current_set": f"{current_set} - Rep {rep + 1}/{self.max_reps}", "time_remaining": 0})
             self.done_reps = rep + 1
-            sound.play_sound(self.up + self.down)
+            sound.play_sound(self.up + self.down, volume=self.volume)
             rep += 1
 
 
-def rest_period(length, exercise, number, status_callback=None, stop_check_callback=None):
+def rest_period(length, exercise, number, status_callback=None, stop_check_callback=None, volume=0.3):
     """Display a rest period between sets."""
     for j in range(length):
         # Check if we should stop
         if stop_check_callback and stop_check_callback():
             break
         if j == length - 10:
-            sound.play_effect("gong")
+            sound.play_effect("gong", volume=volume)
         time_left = length - j
         if status_callback:
             if exercise == "Preparation":
