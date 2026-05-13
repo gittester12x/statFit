@@ -1,6 +1,11 @@
 """Sound effects module for training application."""
-import time
 import os
+import time
+
+# Allow an explicit dummy audio fallback for containerized environments
+if os.environ.get('FORCE_DUMMY_AUDIO', '0') == '1':
+    os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')
+
 from pygame import mixer
 
 DEFAULT_VOLUME = 0.3
@@ -12,8 +17,15 @@ def _init_mixer():
             mixer.init()
         except Exception as e:
             print(f"Audio initialization failed: {e}")
-            # Set a flag or something, but for now, just pass
-            pass
+            if os.environ.get('SDL_AUDIODRIVER') != 'dummy':
+                os.environ['SDL_AUDIODRIVER'] = 'dummy'
+                try:
+                    mixer.quit()
+                    mixer.init()
+                except Exception as e2:
+                    print(f"Audio initialization failed with dummy driver too: {e2}")
+            else:
+                print("Audio not available; continuing without sound.")
 
 
 def play_sound(duration, volume=DEFAULT_VOLUME):

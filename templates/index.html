@@ -473,7 +473,7 @@
         <div class="header">
             <h1><i class="fas fa-dumbbell"></i> StatFit</h1>
             <p>Your Personal Fitness Training Companion</p>
-            <button class="stop-btn" id="stopBtn" title="Stop Training">■</button>
+            <button class="stop-btn" id="headerStopBtn" title="Stop Training" onclick="stopTraining()">■</button>
         </div>
 
         <div class="training-status">
@@ -541,6 +541,40 @@
         let exercises = [];
         let statusCheckInterval;
         let volume = 0.3;
+        let wakeLock = null;
+        let lastRepKey = '';
+        let lastGongPlayed = null;
+
+        function getAudioElement(id) {
+            const audio = document.getElementById(id);
+            if (!audio) return null;
+            audio.volume = volume;
+            audio.muted = false;
+            return audio;
+        }
+
+        function playRepAudio() {
+            const audio = getAudioElement('repAudio');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(() => console.warn('Rep audio blocked by browser'));
+            }
+        }
+
+        function playGongAudio() {
+            const audio = getAudioElement('gongAudio');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(() => console.warn('Gong audio blocked by browser'));
+            }
+        }
+
+        function updateAudioVolume() {
+            const repAudio = document.getElementById('repAudio');
+            const gongAudio = document.getElementById('gongAudio');
+            if (repAudio) repAudio.volume = volume;
+            if (gongAudio) gongAudio.volume = volume;
+        }
 
         function addExercise() {
             const name = document.getElementById('exerciseName').value.trim();
@@ -558,6 +592,7 @@
         function updateVolumeLabel(value) {
             volume = parseInt(value, 10) / 100;
             document.getElementById('volumeValue').textContent = `${value}%`;
+            updateAudioVolume();
         }
 
         function updateExerciseList() {
@@ -627,32 +662,60 @@
             }
 
             try {
+                // Request wake lock to keep screen on during training
+                if (navigator.wakeLock) {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        wakeLock.addEventListener('release', () => {
+                            console.log('Wake lock released');
+                        });
+                    } catch (err) {
+                        console.error('Failed to acquire wake lock:', err);
+                    }
+                }
+
                 const response = await fetch('/start_training', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ exercises, volume })
                 });
+                const data = await response.json().catch(() => null);
+                console.log('start_training response', response.status, response.ok, data);
 
+                const startBtn = document.getElementById('startBtn');
                 if (response.ok) {
-                    document.getElementById('startBtn').disabled = true;
-                    document.getElementById('stopBtn').disabled = false;
+                    if (startBtn) startBtn.disabled = true;
+                    const stopBtn = document.getElementById('stopBtn');
+                    if (stopBtn) stopBtn.disabled = false;
                     statusCheckInterval = setInterval(checkStatus, 1000);
                 } else {
-                    alert('Failed to start training');
+                    alert('Failed to start training: ' + (data?.error || response.statusText || response.status));
+                    if (wakeLock) wakeLock.release();
+                    if (data?.error === 'Training already in progress') {
+                        checkStatus();
+                        if (startBtn) startBtn.disabled = true;
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error starting training');
+                if (wakeLock) wakeLock.release();
             }
         }
 
         async function stopTraining() {
             try {
+                // Release wake lock when training stops
+                if (wakeLock) {
+                    await wakeLock.release();
+                    wakeLock = null;
+                }
+
                 await fetch('/stop_training', { method: 'POST' });
+                await checkStatus();
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('stopBtn').disabled = true;
                 clearInterval(statusCheckInterval);
-                updateStatus({ active: false, current_exercise: '', current_set: '', time_remaining: 0 });
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -682,20 +745,26 @@
             const resultsContent = document.getElementById('resultsContent');
             const mainContent = document.querySelector('.main-content');
             const stopBtn = document.getElementById('stopBtn');
+            const headerStopBtn = document.getElementById('headerStopBtn');
+            const startBtn = document.getElementById('startBtn');
 
             if (status.active) {
+                if (startBtn) startBtn.disabled = true;
                 mainContent.style.display = 'none';
-                stopBtn.style.display = 'block';
+                if (stopBtn) stopBtn.style.display = 'block';
+                if (headerStopBtn) headerStopBtn.style.display = 'block';
                 indicator.className = 'status-indicator status-active';
                 statusText.textContent = 'Training in progress';
                 currentActivity.style.display = 'flex';
 
                 // Determine activity type and name
+                const isPreparation = status.current_exercise === 'Starting training...' || status.current_exercise === 'Get ready!' || (status.current_exercise && status.current_exercise.startsWith('Prepare for'));
+
                 if (status.current_exercise && status.current_exercise.includes('Rest after')) {
                     activityType.textContent = 'REST PERIOD';
                     activityName.textContent = status.current_exercise.replace('Rest after ', '');
                     currentActivity.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-                } else if (status.current_exercise && status.current_exercise !== 'Starting training...') {
+                } else if (status.current_exercise && status.current_exercise !== 'Training Complete!' && !isPreparation) {
                     activityType.textContent = 'EXERCISE';
                     activityName.textContent = status.current_exercise;
                     currentActivity.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -717,6 +786,17 @@
                 if (status.current_set) {
                     progressInfo.style.display = 'block';
                     progressText.textContent = `Current: ${status.current_exercise} - ${status.current_set}`;
+
+                    const repMatch = status.current_set.match(/Rep \d+\/\d+/);
+                    if (repMatch) {
+                        const repKey = `${status.current_exercise}|${status.current_set}`;
+                        if (repKey !== lastRepKey) {
+                            lastRepKey = repKey;
+                            playRepAudio();
+                        }
+                    } else {
+                        lastRepKey = '';
+                    }
 
                     // Calculate progress based on current exercise and set
                     const setMatch = status.current_set.match(/Set (\d+)\/(\d+) - Rep (\d+)\/(\d+)/);
@@ -742,11 +822,22 @@
                     }
                 } else {
                     progressInfo.style.display = 'none';
+                    lastRepKey = '';
+                }
+
+                if (status.time_remaining === 10 && status.current_exercise && status.current_exercise !== 'Training Complete!') {
+                    const gongKey = `${status.current_exercise}|${status.time_remaining}`;
+                    if (gongKey !== lastGongPlayed) {
+                        lastGongPlayed = gongKey;
+                        playGongAudio();
+                    }
                 }
 
             } else {
                 mainContent.style.display = 'grid';
                 stopBtn.style.display = 'none';
+                if (headerStopBtn) headerStopBtn.style.display = 'none';
+                if (startBtn) startBtn.disabled = false;
                 indicator.className = 'status-indicator status-inactive';
                 statusText.textContent = 'Ready to start training';
                 currentActivity.style.display = 'none';
@@ -819,6 +910,7 @@
         // Load default training plan on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDefaultPlan();
+            checkStatus();
             const form = document.getElementById('exerciseForm');
             const presetButtons = document.createElement('div');
             presetButtons.innerHTML = `
@@ -850,5 +942,8 @@
         // Add event listener for stop button
         document.getElementById('stopBtn').addEventListener('click', stopTraining);
     </script>
+
+    <audio id="repAudio" src="/sounds/3sec.wav" preload="auto"></audio>
+    <audio id="gongAudio" src="/sounds/gong.mp3" preload="auto"></audio>
 </body>
 </html>

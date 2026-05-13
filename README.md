@@ -1,38 +1,48 @@
 # StatFit - Cross-Platform Fitness Training Application
 
-A modern, cross-platform fitness training application with both web and command-line interfaces.
+A modern, cross-platform fitness training application with web interface, real-time status tracking, and audio cues.
 
 ## 🚀 Quick Start
 
-**Want to get started immediately?**
+### Option 1: Local Installation (Recommended for Development)
 
 ```bash
-# 1. Download/clone the project
+# Clone and setup
 git clone <your-repo-url>
 cd statfit
 
-# 2. Install dependencies
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Run the web app
-python run.py
-
-# 4. Open http://localhost:5000 in your browser
+# Run the app (listens on http://localhost:5001)
+python3 app.py
 ```
 
-**Note**: If port 5000 is already in use, StatFit will automatically use the next available port (5001, 5002, etc.). Check the terminal output for the exact URL.
+### Option 2: Docker/Podman Deployment (Recommended for Production)
 
-That's it! Your training plan loads automatically. Click "Start Training" and begin! 💪
+```bash
+# Build and start the container
+podman compose -f podman-compose.yaml up --build -d
+
+# App will be available at http://localhost:8080
+```
+
+> Note: Audio playback inside a container is not guaranteed on macOS/Podman because the container often has no access to the host sound subsystem. For reliable sound, run the app locally with Python.
 
 ## Features
 
 - 🏋️ **Custom Training Plans**: Create personalized workout routines
+- 💾 **Settings Persistence**: Automatic save/load of exercises and volume preferences
 - 🌐 **Web Interface**: Modern browser-based training experience
-- ⌨️ **CLI Mode**: Command-line interface for terminal users
-- 🔊 **Audio Cues**: Sound effects and timing guidance
+- 🔊 **Audio Cues**: Sound effects and timing guidance with error handling
 - 📊 **Real-time Status**: Live progress tracking and countdowns
-- 🖥️ **Cross-Platform**: Works on Linux, macOS, and Windows
-- 🎯 **Keyboard Control**: Interactive training with keyboard input
+- 🖥️ **Cross-Platform Display Prevention**: Keeps screen awake during training (Windows, macOS, Linux)
+- 🐳 **Containerized**: Full Docker/Podman support with automatic deployment
+- 📱 **Responsive Design**: Works on desktop and tablet devices
 
 ## 📦 Installation
 
