@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  statfit:
+    build: .
+    container_name: statfit-app
+    ports:
+      - "8080:5000"
+    volumes:
+      - ./sounds:/app/sounds
+      - ./templates:/app/templates
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+    restart: unless-stopped
